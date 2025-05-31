@@ -1,0 +1,5 @@
+#To prevent copying unnecessary files (like node_modules or .env):
+node_modules
+npm-debug.log
+.git
+.env

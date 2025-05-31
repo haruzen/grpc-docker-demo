@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  rest:
+    build:
+      context: ./node-rest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - python-grpc
+    networks:
+      - backend
+
+  python-grpc:
+    build:
+      context: ./python-grpc
+    ports:
+      - "50051:50051"
+    networks:
+      - backend
+
+networks:
+  backend:
