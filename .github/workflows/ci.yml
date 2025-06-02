@@ -1,0 +1,19 @@
+name: CI - Docker Compose App
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout code
+      uses: actions/checkout@v3
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: 🧱 Build REST and gRPC services
+      run: |
+        docker build -t node-rest ./node-rest
+        docker build -t python-grpc ./python-grpc
