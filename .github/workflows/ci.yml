@@ -1,11 +1,12 @@
-name: CI - Docker Compose App
+name: CI - Docker Build & Push
 
 on:
   push:
     branches:
       - main
+
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,11 +19,11 @@ jobs:
     - name: 🔑 Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: 🧱 Build Docker images for REST and gRPC services
+    - name: 🧱 Build Docker Images
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/node-rest:latest ./node-rest
         docker build -t ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest ./python-grpc
-        
+
     - name: 🚀 Push Docker Images
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:latest
