@@ -24,7 +24,7 @@ jobs:
         docker build -t ${{ secrets.DOCKER_USERNAME }}/node-rest:latest ./node-rest
         docker build -t ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest ./python-grpc
 
-    - name: 🚀 Push Docker Images
+    - name: 🚀 Push Docker Images, make sure Docker Hub access token was created with read/write scope.
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest
