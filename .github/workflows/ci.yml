@@ -11,9 +11,19 @@ jobs:
     steps:
     - name: ⬇️ Checkout code
       uses: actions/checkout@v3
+
     - name: 🐳 Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    - name: 🧱 Build REST and gRPC services
+
+    - name: 🔑 Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: 🧱 Build Docker images for REST and gRPC services
       run: |
-        docker build -t node-rest ./node-rest
-        docker build -t python-grpc ./python-grpc
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/node-rest:latest ./node-rest
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest ./python-grpc
+        
+    - name: 🚀 Push Docker Images
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest
