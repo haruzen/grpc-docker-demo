@@ -28,3 +28,20 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚀 Deploy to EC2 server
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker pull haruzen/node-rest:latest
+          docker pull haruzen/python-grpc:latest
+          cd /home/ubuntu/app
+          docker-compose down
+          docker-compose up -d
