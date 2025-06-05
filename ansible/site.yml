@@ -18,7 +18,32 @@
         name: docker
         state: started
         enabled: true
+    # 🔄 Cleanup: Remove existing containers
+    - name: Stop and remove existing Node.js REST container if it exists
+      docker_container:
+        name: node-rest
+        state: absent
+        force_kill: true
 
+    - name: Stop and remove existing Python gRPC container if it exists
+      docker_container:
+        name: python-grpc
+        state: absent
+        force_kill: true
+    
+    # 🧹 Optional Cleanup: Remove existing Docker images
+    - name: Remove existing Node.js REST image if it exists
+      docker_image:
+        name: "{{ node_image }}"
+        state: absent
+        force: true
+
+    - name: Remove existing Python gRPC image if it exists
+      docker_image:
+        name: "{{ python_image }}"
+        state: absent
+        force: true
+    
     - name: Login to Docker Hub
       shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
 
