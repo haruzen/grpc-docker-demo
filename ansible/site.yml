@@ -47,6 +47,13 @@
     - name: Login to Docker Hub
       shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
 
+    # 🌐 Ensure custom bridge network exists
+    - name: Ensure 'backend' Docker network exists
+      docker_network:
+        name: backend
+        driver: bridge
+        state: present
+    
     - name: Pull Node.js REST image
       docker_image:
         name: "{{ node_image }}"
@@ -57,6 +64,17 @@
         name: "{{ python_image }}"
         source: pull
 
+    - name: Run Python gRPC container
+      docker_container:
+        name: python-grpc
+        image: "{{ python_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "50051:50051"
+        networks:
+          - name: backend
+          
     - name: Run Node.js REST container
       docker_container:
         name: node-rest
@@ -69,15 +87,5 @@
           GRPC_HOST: "python-grpc"
           GRPC_PORT: "50051"
         networks:
-          - name: bridgenet
+          - name: backend
 
-    - name: Run Python gRPC container
-      docker_container:
-        name: python-grpc
-        image: "{{ python_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "50051:50051"
-        networks:
-          - name: bridgenet
