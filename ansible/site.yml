@@ -69,7 +69,7 @@
           GRPC_HOST: "python-grpc"
           GRPC_PORT: "50051"
         networks:
-          - name: bridge
+          - name: bridgenet
 
     - name: Run Python gRPC container
       docker_container:
@@ -80,4 +80,4 @@
         ports:
           - "50051:50051"
         networks:
-          - name: bridge
+          - name: bridgenet
