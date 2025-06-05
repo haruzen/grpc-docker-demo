@@ -6,67 +6,52 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout code
-      uses: actions/checkout@v4
+      - name: ⬇️ Checkout source
+        uses: actions/checkout@v3
 
-    - name: 🐳 Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: 🔑 Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: 🔑 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: 🧱 Build Docker Images
-      run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/node-rest:v1.0 ./node-rest
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/python-grpc:v1.0 ./python-grpc
+      - name: 📦 Build and push Node.js REST image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./node-rest
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/node-rest:release_v1.0
 
-    - name: 🚀 Push Docker Images, make sure Docker Hub access token was created with read/write scope.
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:v1.0
-        docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:v1.0
+      - name: 🐍 Build and push Python gRPC image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./python-grpc
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc:release_v1.0
 
-    - name: Create SSH key file
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+      - name: 📦 Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
 
-    - name: Generate inventory file
-      run: |
-        cat <<EOF > inventory.ini
-          [app]
-          ${{ secrets.REMOTE_HOST }} ansible_user=${{ secrets.REMOTE_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa
-          EOF
+      - name: 📁 Create Ansible inventory
+        run: |
+          mkdir -p ansible
+          echo "[webserver]" > ansible/inventory.ini
+          echo "${{ secrets.REMOTE_HOST }} ansible_user=${{ secrets.REMOTE_USER }} ansible_ssh_private_key_file=key.pem" >> ansible/inventory.ini
 
-    - name: Deploy using Ansible
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-          playbook: ansible/site.yml
-          inventory: inventory.ini
-          options: >
-            --ssh-extra-args="-o StrictHostKeyChecking=no"
-      env:
-          ANSIBLE_HOST_KEY_CHECKING: false
+      - name: 🔐 Set up SSH private key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
 
-
-  # deploy:
-  #   needs: build-and-push
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #   - name: 🚀 Deploy to EC2 server
-  #     uses: appleboy/ssh-action@v0.1.6
-  #     with:
-  #       host: ${{ secrets.REMOTE_HOST }}
-  #       username: ${{ secrets.REMOTE_USER }}
-  #       key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #       script: |
-  #         docker pull haruzen/node-rest:latest
-  #         docker pull haruzen/python-grpc:latest
-  #         cd /home/ubuntu/app
-  #         docker-compose down
-  #         docker-compose up -d
+      - name: 🚀 Run Ansible playbook
+        run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

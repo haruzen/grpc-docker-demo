@@ -1,39 +1,57 @@
-- name: Provision EC2 for microservices
-  hosts: app
-  become: true
-  tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+name: CI/CD for Cross-Language Microservices
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
+on:
+  push:
+    branches:
+      - main
 
-    - name: Install Docker Compose
-      get_url:
-        url: https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64
-        dest: /usr/local/bin/docker-compose
-        mode: '0755'
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
 
-    - name: Add current user to docker group
-      user:
-        name: ubuntu
-        groups: docker
-        append: yes
+    steps:
+      - name: ⬇️ Checkout source
+        uses: actions/checkout@v3
 
-    - name: Create app directory
-      file:
-        path: /home/ubuntu/app
-        state: directory
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Copy docker-compose file
-      copy:
-        src: ../docker-compose.yml
-        dest: /home/ubuntu/app/docker-compose.yml"
+      - name: 🔑 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Start services
-      command:
-        cmd: docker-compose up -d
-        chdir: /home/ubuntu/app
+      - name: 📦 Build and push Node.js REST image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./node-rest
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/node-rest:release_v1.0
+
+      - name: 🐍 Build and push Python gRPC image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./python-grpc
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc::release_v1.0
+
+      - name: 📦 Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name: 📁 Create Ansible inventory
+        run: |
+          mkdir -p ansible
+          echo "[webserver]" > ansible/inventory.ini
+          echo "${{ secrets.REMOTE_HOST }} ansible_user=${{ secrets.REMOTE_USER }} ansible_ssh_private_key_file=key.pem" >> ansible/inventory.ini
+
+      - name: 🔐 Set up SSH private key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: 🚀 Run Ansible playbook
+        run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
