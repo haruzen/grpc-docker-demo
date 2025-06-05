@@ -1,4 +1,4 @@
-name: CI - Docker Build & Push
+name: CI/CD for Cross-Language Microservices
 
 on:
   push:
@@ -11,37 +11,46 @@ jobs:
 
     steps:
     - name: ⬇️ Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 🐳 Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: 🔑 Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
     - name: 🧱 Build Docker Images
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/node-rest:latest ./node-rest
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest ./python-grpc
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/node-rest:v1.0 ./node-rest
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/python-grpc:v1.0 ./python-grpc
 
     - name: 🚀 Push Docker Images, make sure Docker Hub access token was created with read/write scope.
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:latest
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:v1.0
+        docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:v1.0
+  # deploy:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: 🚀 Deploy to EC2 server
-      uses: appleboy/ssh-action@v0.1.6
+  #   steps:
+  #   - name: 🚀 Deploy to EC2 server
+  #     uses: appleboy/ssh-action@v0.1.6
+  #     with:
+  #       host: ${{ secrets.REMOTE_HOST }}
+  #       username: ${{ secrets.REMOTE_USER }}
+  #       key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #       script: |
+  #         docker pull haruzen/node-rest:latest
+  #         docker pull haruzen/python-grpc:latest
+  #         cd /home/ubuntu/app
+  #         docker-compose down
+  #         docker-compose up -d
+
+    - name: Deploy using Ansible
+      uses: dawidd6/action-ansible-playbook@v2
       with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          docker pull haruzen/node-rest:latest
-          docker pull haruzen/python-grpc:latest
-          cd /home/ubuntu/app
-          docker-compose down
-          docker-compose up -d
+          playbook: ansible/site.yml
+          inventory: ansible/inventory.ini
+          options: --ssh-extra-args='-o StrictHostKeyChecking=no'
+      env:
+          ANSIBLE_HOST_KEY_CHECKING: false
