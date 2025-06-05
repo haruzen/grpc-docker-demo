@@ -37,10 +37,10 @@ jobs:
 
     - name: Generate inventory file
       run: |
-          cat <<EOF > inventory.ini
-[app]
-${{ secrets.REMOTE_HOST }} ansible_user=${{ secrets.REMOTE_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa
-EOF
+        cat <<EOF > inventory.ini
+          [app]
+          ${{ secrets.REMOTE_HOST }} ansible_user=${{ secrets.REMOTE_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa
+          EOF
 
     - name: Deploy using Ansible
       uses: dawidd6/action-ansible-playbook@v2
