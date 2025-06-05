@@ -49,6 +49,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
 
+      - name: 🛡️ Disable SSH host key checking
+        run: echo "ANSIBLE_HOST_KEY_CHECKING=False" >> $GITHUB_ENV
+
       - name: 🚀 Run Ansible playbook
         run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
         env:
