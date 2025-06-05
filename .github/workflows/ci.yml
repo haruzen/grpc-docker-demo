@@ -28,6 +28,18 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/node-rest:v1.0
         docker push ${{ secrets.DOCKER_USERNAME }}/python-grpc:v1.0
+
+    - name: Deploy using Ansible
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+          playbook: ansible/site.yml
+          inventory: ansible/inventory.ini
+          options: >
+            --ssh-extra-args="-o StrictHostKeyChecking=no"
+      env:
+          ANSIBLE_HOST_KEY_CHECKING: false
+
+
   # deploy:
   #   needs: build-and-push
   #   runs-on: ubuntu-latest
@@ -45,13 +57,3 @@ jobs:
   #         cd /home/ubuntu/app
   #         docker-compose down
   #         docker-compose up -d
-
-    - name: Deploy using Ansible
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-          playbook: ansible/site.yml
-          inventory: ansible/inventory.ini
-          options: >
-            --ssh-extra-args="-o StrictHostKeyChecking=no"
-      env:
-          ANSIBLE_HOST_KEY_CHECKING: false
