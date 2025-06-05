@@ -1,57 +1,54 @@
-name: CI/CD for Cross-Language Microservices
+- name: Provision EC2 for microservices
+  hosts: webserver
+  become: true
+  vars:
+    docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
+    docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
+    node_image: "{{ docker_username }}/node-rest:release_v1.0"
+    python_image: "{{ docker_username }}/python-grpc:release_v1.0"
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
 
-on:
-  push:
-    branches:
-      - main
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
 
-jobs:
-  build-deploy:
-    runs-on: ubuntu-latest
+    - name: Login to Docker Hub
+      shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
 
-    steps:
-      - name: ⬇️ Checkout source
-        uses: actions/checkout@v3
+    - name: Pull Node.js REST image
+      docker_image:
+        name: "{{ node_image }}"
+        source: pull
 
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+    - name: Pull Python gRPC image
+      docker_image:
+        name: "{{ python_image }}"
+        source: pull
 
-      - name: 🔑 Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: 📦 Build and push Node.js REST image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./node-rest
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/node-rest:release_v1.0
-
-      - name: 🐍 Build and push Python gRPC image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./python-grpc
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc::release_v1.0
-
-      - name: 📦 Install Ansible
-        run: sudo apt-get update && sudo apt-get install -y ansible
-
-      - name: 📁 Create Ansible inventory
-        run: |
-          mkdir -p ansible
-          echo "[webserver]" > ansible/inventory.ini
-          echo "${{ secrets.REMOTE_HOST }} ansible_user=${{ secrets.REMOTE_USER }} ansible_ssh_private_key_file=key.pem" >> ansible/inventory.ini
-
-      - name: 🔐 Set up SSH private key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
-
-      - name: 🚀 Run Ansible playbook
-        run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
+    - name: Run Node.js REST container
+      docker_container:
+        name: node-rest
+        image: "{{ node_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "80:3000"
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GRPC_HOST: "python-grpc"
+          GRPC_PORT: "50051"
+
+    - name: Run Python gRPC container
+      docker_container:
+        name: python-grpc
+        image: "{{ python_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "50051:50051"
