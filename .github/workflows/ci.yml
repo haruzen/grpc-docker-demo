@@ -51,6 +51,7 @@ jobs:
       with:
           playbook: ansible/site.yml
           inventory: ansible/inventory.ini
-          options: --ssh-extra-args='-o StrictHostKeyChecking=no'
+          options: >
+            --ssh-extra-args="-o StrictHostKeyChecking=no"
       env:
           ANSIBLE_HOST_KEY_CHECKING: false
