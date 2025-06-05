@@ -1,6 +1,3 @@
-# === 2. ANSIBLE PLAYBOOK ===
-# File: ansible/site.yml  Ansible to provision and configure the EC2 server
-
 - name: Provision EC2 for microservices
   hosts: app
   become: true
