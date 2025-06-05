@@ -74,7 +74,7 @@
           - "50051:50051"
         networks:
           - name: backend
-          
+
     - name: Run Node.js REST container
       docker_container:
         name: node-rest
