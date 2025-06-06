@@ -36,13 +36,13 @@
       docker_image:
         name: "{{ node_image }}"
         state: absent
-        force: true
+        force_absent: true
 
     - name: Remove existing Python gRPC image if it exists
       docker_image:
         name: "{{ python_image }}"
         state: absent
-        force: true
+        force_absent: true
     
     - name: Login to Docker Hub
       shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
