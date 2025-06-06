@@ -1,4 +1,4 @@
-- name: Provision EC2 for microservices
+- name: Provision EC2 for microservices with NGINX
   hosts: webserver
   become: true
   vars:
@@ -6,6 +6,8 @@
     docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
     node_image: "{{ docker_username }}/node-rest:release_v1.0"
     python_image: "{{ docker_username }}/python-grpc:release_v1.0"
+    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.0"
+
   tasks:
     - name: Ensure Docker is installed
       apt:
@@ -18,31 +20,50 @@
         name: docker
         state: started
         enabled: true
-    # 🔄 Cleanup: Remove existing containers
-    - name: Stop and remove existing Node.js REST container if it exists
-      docker_container:
-        name: node-rest
-        state: absent
-        force_kill: true
+    # # 🔄 Cleanup: Remove existing containers
+    # - name: Stop and remove existing Node.js REST container if it exists
+    #   docker_container:
+    #     name: node-rest
+    #     state: absent
+    #     force_kill: true
 
-    - name: Stop and remove existing Python gRPC container if it exists
-      docker_container:
-        name: python-grpc
-        state: absent
-        force_kill: true
+    # - name: Stop and remove existing Python gRPC container if it exists
+    #   docker_container:
+    #     name: python-grpc
+    #     state: absent
+    #     force_kill: true
     
-    # 🧹 Optional Cleanup: Remove existing Docker images
-    - name: Remove existing Node.js REST image if it exists
-      docker_image:
-        name: "{{ node_image }}"
-        state: absent
-        force_absent: true
+    # # 🧹 Optional Cleanup: Remove existing Docker images
+    # - name: Remove existing Node.js REST image if it exists
+    #   docker_image:
+    #     name: "{{ node_image }}"
+    #     state: absent
+    #     force_absent: true
 
-    - name: Remove existing Python gRPC image if it exists
+    # - name: Remove existing Python gRPC image if it exists
+    #   docker_image:
+    #     name: "{{ python_image }}"
+    #     state: absent
+    #     force_absent: true
+    - name: Remove old containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+        force_kill: true
+      loop:
+        - node-rest
+        - python-grpc
+        - nginx
+
+    - name: Remove old images
       docker_image:
-        name: "{{ python_image }}"
+        name: "{{ item }}"
         state: absent
         force_absent: true
+      loop:
+        - "{{ node_image }}"
+        - "{{ python_image }}"
+        - "{{ nginx_image }}"
     
     - name: Login to Docker Hub
       shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
@@ -54,15 +75,24 @@
         driver: bridge
         state: present
     
-    - name: Pull Node.js REST image
-      docker_image:
-        name: "{{ node_image }}"
-        source: pull
+    # - name: Pull Node.js REST image
+    #   docker_image:
+    #     name: "{{ node_image }}"
+    #     source: pull
 
-    - name: Pull Python gRPC image
+    # - name: Pull Python gRPC image
+    #   docker_image:
+    #     name: "{{ python_image }}"
+    #     source: pull
+    - name: Pull microservice images
       docker_image:
-        name: "{{ python_image }}"
+        name: "{{ item }}"
         source: pull
+      loop:
+        - "{{ node_image }}"
+        - "{{ python_image }}"
+        - "{{ nginx_image }}"
+
 
     - name: Run Python gRPC container
       docker_container:
@@ -89,3 +119,13 @@
         networks:
           - name: backend
 
+    - name: Run NGINX reverse proxy container
+      docker_container:
+        name: nginx
+        image: "{{ nginx_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
+        networks:
+          - name: backend

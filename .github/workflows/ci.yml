@@ -35,6 +35,15 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc:release_v1.0
 
+        # Build and push NGINX reverse proxy image
+      - name: 🌐 Build and push NGINX reverse proxy image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nginx
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:release_v1.0
+
+
       - name: 📦 Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
