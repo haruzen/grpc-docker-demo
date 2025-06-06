@@ -53,7 +53,7 @@
       loop:
         - node-rest
         - python-grpc
-        - nginx
+        - nginx-proxy
 
     - name: Remove old images
       docker_image:
@@ -93,7 +93,6 @@
         - "{{ python_image }}"
         - "{{ nginx_image }}"
 
-
     - name: Run Python gRPC container
       docker_container:
         name: python-grpc
@@ -121,7 +120,7 @@
 
     - name: Run NGINX reverse proxy container
       docker_container:
-        name: nginx
+        name: nginx-proxy
         image: "{{ nginx_image }}"
         state: started
         restart_policy: always
