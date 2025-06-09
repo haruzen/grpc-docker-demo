@@ -128,6 +128,22 @@
         - certbot-etc
         - certbot-var
 
+    - name: Run Certbot to issue TLS certificate
+      docker_container:
+        name: certbot
+        image: certbot/certbot
+        command: >
+          certonly --webroot --webroot-path=/var/www/certbot
+          --email buixuantoan@gmail.com --agree-tos --no-eff-email
+          -d haruzendomain.duckdns.org
+        volumes:
+          - certbot-etc:/etc/letsencrypt
+          - certbot-var:/var/www/certbot
+        auto_remove: yes
+        state: started
+        register: cert_issued_result
+
+
     - name: Run NGINX reverse proxy container with TLS volumes
       docker_container:
         name: nginx-proxy
@@ -142,22 +158,9 @@
         volumes:
           - certbot-etc:/etc/letsencrypt
           - certbot-var:/var/www/certbot
- 
-    - name: Run Certbot to issue TLS certificate
-      docker_container:
-        name: certbot
-        image: certbot/certbot
-        command: >
-          certonly --webroot --webroot-path=/var/www/certbot
-          --email buixuantoan@gmail.com --agree-tos --no-eff-email
-          -d haruzendomain.duckdns.org
-        volumes:
-          - certbot-etc:/etc/letsencrypt
-          - certbot-var:/var/www/certbot
-        auto_remove: yes
-        state: started
+        when: cert_issued_result is succeeded
 
-
+      
     # - name: Run NGINX reverse proxy container
     #   docker_container:
     #     name: nginx-proxy
