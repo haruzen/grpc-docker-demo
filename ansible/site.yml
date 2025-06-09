@@ -141,7 +141,7 @@
           - certbot-var:/var/www/certbot
         auto_remove: yes
         state: started
-        register: cert_issued_result
+      register: cert_issued_result
 
 
     - name: Run NGINX reverse proxy container with TLS volumes
@@ -158,7 +158,7 @@
         volumes:
           - certbot-etc:/etc/letsencrypt
           - certbot-var:/var/www/certbot
-        when: cert_issued_result is succeeded
+      when: cert_issued_result is succeeded
 
       
     # - name: Run NGINX reverse proxy container
