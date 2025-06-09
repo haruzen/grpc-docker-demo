@@ -154,7 +154,7 @@
         volumes:
           - certbot-etc:/etc/letsencrypt
           - certbot-var:/var/www/certbot
-        autoremove: yes
+        auto_remove: yes
         state: started
 
 
