@@ -45,6 +45,8 @@
     #     name: "{{ python_image }}"
     #     state: absent
     #     force_absent: true
+
+
     - name: Remove old containers
       docker_container:
         name: "{{ item }}"
@@ -54,6 +56,7 @@
         - node-rest
         - python-grpc
         - nginx-proxy
+        - certbot
 
     - name: Remove old images
       docker_image:
@@ -118,7 +121,14 @@
         networks:
           - name: backend
 
-    - name: Run NGINX reverse proxy container
+    - name: Create volumes for certbot
+      docker_volume:
+        name: "{{ item }}"
+      loop:
+        - certbot-etc
+        - certbot-var
+
+    - name: Run NGINX reverse proxy container with TLS volumes
       docker_container:
         name: nginx-proxy
         image: "{{ nginx_image }}"
@@ -126,5 +136,35 @@
         restart_policy: always
         ports:
           - "80:80"
+          - "443:443"
         networks:
           - name: backend
+        volumes:
+          - certbot-etc:/etc/letsencrypt
+          - certbot-var:/var/www/certbot
+ 
+    - name: Run Certbot to issue TLS certificate
+      docker_container:
+        name: certbot
+        image: certbot/certbot
+        command: >
+          certonly --webroot --webroot-path=/var/www/certbot
+          --email buixuantoan@gmail.com --agree-tos --no-eff-email
+          -d haruzendomain.duckdns.org
+        volumes:
+          - certbot-etc:/etc/letsencrypt
+          - certbot-var:/var/www/certbot
+        autoremove: yes
+        state: started
+
+
+    # - name: Run NGINX reverse proxy container
+    #   docker_container:
+    #     name: nginx-proxy
+    #     image: "{{ nginx_image }}"
+    #     state: started
+    #     restart_policy: always
+    #     ports:
+    #       - "80:80"
+    #     networks:
+    #       - name: backend
