@@ -35,13 +35,13 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc:release_v1.0
 
-        # Build and push NGINX reverse proxy image
+    # Build and push NGINX reverse proxy image
       - name: 🌐 Build and push NGINX reverse proxy image
         uses: docker/build-push-action@v5
         with:
           context: ./nginx
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:release_v1.1
+          tags: ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:release_v1.2
 
 
       - name: 📦 Install Ansible

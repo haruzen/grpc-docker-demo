@@ -6,7 +6,7 @@
     docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
     node_image: "{{ docker_username }}/node-rest:release_v1.0"
     python_image: "{{ docker_username }}/python-grpc:release_v1.0"
-    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.1"
+    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.2"
 
   tasks:
     - name: Ensure Docker is installed
@@ -56,7 +56,7 @@
         - node-rest
         - python-grpc
         - nginx-proxy
-        - certbot
+  
 
     - name: Remove old images
       docker_image:
@@ -121,30 +121,7 @@
         networks:
           - name: backend
 
-    - name: Create volumes for certbot
-      docker_volume:
-        name: "{{ item }}"
-      loop:
-        - certbot-etc
-        - certbot-var
-
-    - name: Run Certbot to issue TLS certificate
-      docker_container:
-        name: certbot
-        image: certbot/certbot
-        command: >
-          certonly --webroot --webroot-path=/var/www/certbot
-          --email buixuantoan@gmail.com --agree-tos --no-eff-email
-          -d haruzendomain.duckdns.org
-        volumes:
-          - certbot-etc:/etc/letsencrypt
-          - certbot-var:/var/www/certbot
-        auto_remove: yes
-        state: started
-      register: cert_issued_result
-
-
-    - name: Run NGINX reverse proxy container with TLS volumes
+    - name: Run NGINX reverse proxy container
       docker_container:
         name: nginx-proxy
         image: "{{ nginx_image }}"
@@ -152,16 +129,33 @@
         restart_policy: always
         ports:
           - "80:80"
-          - "443:443"
         networks:
           - name: backend
-        volumes:
-          - certbot-etc:/etc/letsencrypt
-          - certbot-var:/var/www/certbot
-      when: cert_issued_result is succeeded
+          
+    # - name: Create volumes for certbot
+    #   docker_volume:
+    #     name: "{{ item }}"
+    #   loop:
+    #     - certbot-etc
+    #     - certbot-var
 
-      
-    # - name: Run NGINX reverse proxy container
+    # - name: Run Certbot to issue TLS certificate
+    #   docker_container:
+    #     name: certbot
+    #     image: certbot/certbot
+    #     command: >
+    #       certonly --webroot --webroot-path=/var/www/certbot
+    #       --email buixuantoan@gmail.com --agree-tos --no-eff-email
+    #       -d haruzendomain.duckdns.org
+    #     volumes:
+    #       - certbot-etc:/etc/letsencrypt
+    #       - certbot-var:/var/www/certbot
+    #     auto_remove: yes
+    #     state: started
+    #   register: cert_issued_result
+
+
+    # - name: Run NGINX reverse proxy container with TLS volumes
     #   docker_container:
     #     name: nginx-proxy
     #     image: "{{ nginx_image }}"
@@ -169,5 +163,12 @@
     #     restart_policy: always
     #     ports:
     #       - "80:80"
+    #       - "443:443"
     #     networks:
     #       - name: backend
+    #     volumes:
+    #       - certbot-etc:/etc/letsencrypt
+    #       - certbot-var:/var/www/certbot
+    #   when: cert_issued_result is succeeded
+
+      
