@@ -6,7 +6,7 @@
     docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
     node_image: "{{ docker_username }}/node-rest:release_v1.0"
     python_image: "{{ docker_username }}/python-grpc:release_v1.0"
-    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.0"
+    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.1"
 
   tasks:
     - name: Ensure Docker is installed
