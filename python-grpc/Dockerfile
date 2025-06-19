@@ -1,6 +1,6 @@
 # Use official Python 3.13.3 image from Docker Hub
 FROM python:3.13.3-slim
-
+RUN apt update && apt install -y curl
 # Set the working directory inside the container
 WORKDIR /app
 
