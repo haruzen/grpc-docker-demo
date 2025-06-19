@@ -26,14 +26,14 @@ jobs:
         with:
           context: ./node-rest
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/node-rest:release_v1.0
+          tags: ${{ secrets.DOCKER_USERNAME }}/node-rest:release_v1.3
 
       - name: 🐍 Build and push Python gRPC image
         uses: docker/build-push-action@v5
         with:
           context: ./python-grpc
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc:release_v1.0
+          tags: ${{ secrets.DOCKER_USERNAME }}/python-grpc:release_v1.3
 
     # Build and push NGINX reverse proxy image
       - name: 🌐 Build and push NGINX reverse proxy image
@@ -41,8 +41,7 @@ jobs:
         with:
           context: ./nginx
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:release_v1.2
-
+          tags: ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:release_v1.3
 
       - name: 📦 Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible

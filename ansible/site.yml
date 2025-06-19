@@ -4,9 +4,9 @@
   vars:
     docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
     docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
-    node_image: "{{ docker_username }}/node-rest:release_v1.0"
-    python_image: "{{ docker_username }}/python-grpc:release_v1.0"
-    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.2"
+    node_image: "{{ docker_username }}/node-rest:release_v1.3"
+    python_image: "{{ docker_username }}/python-grpc:release_v1.3"
+    nginx_image: "{{ docker_username }}/nginx-proxy:release_v1.3"
 
   tasks:
     - name: Ensure Docker is installed
