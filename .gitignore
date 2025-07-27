@@ -1,5 +1,58 @@
+# Node.js
 node_modules/
-.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
 __pycache__/
-.vscode/
+*.py[cod]
+*.pyo
 venv/
+.env
+
+# Local environment variables
+.env*
+!*.example         
+node-rest/.env.*
+!node-rest/.env.example
+
+# VS Code settings
+.vscode/
+
+# SSL certificates (don't commit secrets)
+nginx/ssl/
+
+# Logs
+logs/
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Docker files
+*.pid
+*.seed
+docker-compose.override.yml
+
+# Coverage/testing
+coverage/
+*.cover
+*.pyc
+*.pyd
+*.pdb
+.cache/
+test-results/
+junit.xml
+htmlcov/
+
+# MongoDB dump
+dump/
+
+# Frontend build artifacts (if applicable)
+frontend/dist/
+frontend/build/
+
+# Misc
+.idea/
