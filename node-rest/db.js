@@ -1,8 +1,8 @@
 // db.js
 const { MongoClient } = require('mongodb');
 
-const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/cross-language-microservices';
-const dbName = process.env.MONGO_DBNAME || 'cross-language-microservices';
+const uri = process.env.MONGO_URI ;
+const dbName = process.env.MONGO_DBNAME;
 
 let client;
 let db;
