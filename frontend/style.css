@@ -1,0 +1,101 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f6f8fa;
+  margin: 0;
+  padding: 0;
+}
+
+.login-panel {
+  max-width: 420px;
+  margin: 32px auto 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+#login-btn,
+#logout-btn {
+  padding: 8px 20px;
+  background: #0078d4;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+  outline: none;
+}
+
+#login-btn:hover,
+#logout-btn:hover {
+  background: #005ea0;
+}
+
+#user-role {
+  margin-left: 10px;
+  font-size: 0.98em;
+  color: #388e3c;
+  font-weight: 500;
+}
+
+#tasks-title {
+  max-width: 420px;
+  margin: 18px auto 8px auto;
+  text-align: left;
+  color: #222;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+#tasks-table {
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+#tasks-table th, #tasks-table td {
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid #f2f2f2;
+  font-size: 1em;
+}
+
+#tasks-table th {
+  background: #f7fafc;
+  color: #333;
+  font-weight: 600;
+  font-size: 1.02em;
+  letter-spacing: 0.03em;
+}
+
+#tasks-table tr:last-child td {
+  border-bottom: none;
+}
+
+#tasks-table tbody tr:hover {
+  background: #f0f4ff;
+}
+
+@media (max-width: 600px) {
+  .login-panel, #tasks-title, #tasks-table {
+    max-width: 98vw;
+    font-size: 0.96em;
+  }
+  #tasks-table th, #tasks-table td {
+    padding: 8px 5px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 6px;
+}

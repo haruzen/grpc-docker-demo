@@ -1,32 +1,69 @@
-version: '3.8'
 
 services:
-  nginx:
-    build:
-      context: ./nginx
-    ports:
-      - "80:80"
-    depends_on:
-      - node-rest
-    networks:
-      - backend
-  rest:
+  node-rest:
     build:
       context: ./node-rest
-    ports:
-      - "3000:3000"
-    depends_on:
-      - python-grpc
+      dockerfile: Dockerfile
+    container_name: node-rest
+    env_file:
+      - ./node-rest/.env
+    working_dir: /app
+    command: node index.js
+   # ports:
+   #   - "3000:3000"    # Optional: for host debugging
+    expose:
+      - "3000"
+    restart: unless-stopped
     networks:
       - backend
 
-  python-grpc:
+  nginx:
     build:
-      context: ./python-grpc
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    container_name: nginx
+    depends_on:
+      - node-rest
     ports:
-      - "50051:50051"
+      - "8080:8080"
     networks:
       - backend
 
 networks:
   backend:
+    driver: bridge
+
+
+
+# version: '3.8'
+
+# services:
+#   nginx:
+#     build:
+#       context: ./nginx
+#     ports:
+#       - "80:80"
+#     depends_on:
+#       - node-rest
+#     networks:
+#       - backend
+#   rest:
+#     build:
+#       context: ./node-rest
+#     ports:
+#       - "3000:3000"
+#     depends_on:
+#       - python-grpc
+#     networks:
+#       - backend
+
+#   python-grpc:
+#     build:
+#       context: ./python-grpc
+#     ports:
+#       - "50051:50051"
+#     networks:
+#       - backend
+
+# networks:
+#   backend:
