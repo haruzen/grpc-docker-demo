@@ -1,18 +1,12 @@
-version: "3.8"  # ✅ Recommended: always include version
 services:
   node-rest:
     build:
       context: ./node-rest
       dockerfile: Dockerfile
-    container_name: node-rest
     env_file:
-      - ./node-rest/.env
-    working_dir: /app
-    command: node index.js
-   # ports:
-   #   - "3000:3000"    # Optional: for host debugging
+      - ./node-rest/.env.production
     expose:
-      - "3000"   # ✅ Internal-only; good for service-to-service
+      - "3000"
     restart: unless-stopped
     networks:
       - backend
@@ -21,18 +15,17 @@ services:
     build:
       context: .
       dockerfile: ./nginx/Dockerfile
-    container_name: nginx
-    depends_on:
-      - node-rest
     ports:
       - "8080:8080"
+    depends_on:
+      - node-rest
+    restart: unless-stopped
     networks:
       - backend
 
 networks:
   backend:
     driver: bridge
-
 
 
 # version: '3.8'
