@@ -1,8 +1,14 @@
 FROM nginx:latest
 
-# Copy custom nginx config
+# Copy NGINX config
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-# Copy static frontend files (now from /frontend)
+
+# Copy frontend files
 COPY frontend /usr/share/nginx/html/frontend
 
-EXPOSE 8080
+# Optional: Copy SSL certs (or mount as volume instead)
+#COPY nginx/ssl/selfsigned.crt /etc/nginx/ssl/selfsigned.crt
+#COPY nginx/ssl/selfsigned.key /etc/nginx/ssl/selfsigned.key
+
+# Expose standard web ports
+EXPOSE 80 443

@@ -26,10 +26,12 @@ services:
     depends_on:
       - node-rest
     ports:
-      - "8080:8080"                   # Expose NGINX to host for frontend access
+      - "80:80"                   # Expose NGINX to host for frontend access
+      - "443:443"                 # Expose NGINX for HTTPS
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./frontend:/usr/share/nginx/html/frontend:ro  # Serve static frontend
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # Mount SSL certs
     networks:
       - backend
 

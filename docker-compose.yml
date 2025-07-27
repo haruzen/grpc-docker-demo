@@ -16,10 +16,13 @@ services:
       context: .
       dockerfile: ./nginx/Dockerfile
     ports:
-      - "8080:8080"
+      - "80:80"     # HTTP redirect to HTTPS
+      - "443:443"   # HTTPS served content
     depends_on:
       - node-rest
     restart: unless-stopped
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # Mount SSL certs
     networks:
       - backend
 
