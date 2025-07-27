@@ -21,9 +21,18 @@ function base64URLEncode(str) {
   return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+
 async function sha256(buffer) {
-  return await crypto.subtle.digest("SHA-256", new TextEncoder().encode(buffer));
+  if (!window.crypto || !window.crypto.subtle) {
+    console.error("Crypto.subtle is not available. Use HTTPS or localhost.");
+    throw new Error("SubtleCrypto not available. Must run in secure context (HTTPS).");
+  }
+
+  const encoded = new TextEncoder().encode(buffer);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", encoded);
+  return hashBuffer;
 }
+
 
 // JWT Helper
 function parseJwt(token) {
