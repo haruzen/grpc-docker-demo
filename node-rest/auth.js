@@ -1,5 +1,13 @@
 //Backend: Add /api/auth/token Endpoint
-require('dotenv').config();
+//require('dotenv').config();
+const fs = require('fs');
+let envFile = ".env.local";
+if (process.env.NODE_ENV === "production") {
+  envFile = ".env.production";
+}
+if (fs.existsSync(envFile)) {
+  require("dotenv").config({ path: envFile });
+}
 const express = require('express');
 const router = express.Router();
 
