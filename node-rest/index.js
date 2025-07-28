@@ -16,6 +16,7 @@ const tasksRouter = require('./routes/tasks');
 const adminRouter = require('./routes/admin');  
 
 const app = express();
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Serve static frontend files from the main frontend folder (one level up)
