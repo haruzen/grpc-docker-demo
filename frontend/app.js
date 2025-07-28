@@ -95,7 +95,7 @@ async function handleRedirect() {
       const res = await fetch("/api/auth/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: JSON.stringify({ code, verifier })
+        body: params.toString()
       });
       const tokens = await res.json();
       if (tokens.access_token) {

@@ -3,7 +3,7 @@
 // ==== Config ====
 const COGNITO_DOMAIN = "https://ap-southeast-2v3udzxxtw.auth.ap-southeast-2.amazoncognito.com"; // e.g. myapp.auth.ap-southeast-1.amazoncognito.com
 const CLIENT_ID = "7jjhsd6m1q3um03106k9l3b15k";
-const REDIRECT_URI = "http://localhost:8080/frontend/index.html"; // Or your actual deployed URL
+const REDIRECT_URI = "http://localhost/frontend/index.html"; // Or your actual deployed URL
 //const API_BASE = "http://localhost:3000"; // Backend API endpoint
 const SCOPE = "openid email profile";
 
