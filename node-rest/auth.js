@@ -17,6 +17,7 @@ const CLIENT_SECRET = process.env.COGNITO_CLIENT_SECRET;
 const REDIRECT_URI = process.env.COGNITO_REDIRECT_URI;
 
 router.post('/token', async (req, res) => {
+ try { 
   const { code, verifier } = req.body;
   const params = new URLSearchParams();
   params.append('grant_type', 'authorization_code');
@@ -32,11 +33,15 @@ router.post('/token', async (req, res) => {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `Basic ${basicAuth}`
     },
-    body: params
+    body: params.toString()
   });
-  const data = await response.json();
-  if (!response.ok) return res.status(400).json(data);
-  res.json(data);
+    const data = await response.json();
+    if (!response.ok) return res.status(400).json(data);
+    res.json(data);
+  } catch (err) {
+    console.error('Token exchange error:', err);
+    res.status(500).json({ error: 'Token exchange failed', details: err.message });
+  }
 });
 
 // Middleware auth.js
